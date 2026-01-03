@@ -4,6 +4,8 @@ namespace App\Filament\Pages\Character\Form;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 
 class CharacterStatisticForm
 {
@@ -23,13 +25,14 @@ class CharacterStatisticForm
                     TextInput::make("max_health")
                         ->label("Max Health")
                         ->helperText(
-                            "Your character’s maximum hit points (HP).",
+                            "Your character’s maximum hit points (HP). Updated by Dungeon Master.",
                         )
                         ->numeric()
                         ->maxValue(255)
                         ->minValue(0)
                         ->default(100)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("current_health")
                         ->label("Current Health")
@@ -53,13 +56,14 @@ class CharacterStatisticForm
                     TextInput::make("max_mana")
                         ->label("Max Mana")
                         ->helperText(
-                            "Maximum mana points (MP), if your system uses mana.",
+                            "Maximum mana points (MP), if your system uses mana. Updated by Dungeon Master.",
                         )
                         ->numeric()
                         ->maxValue(255)
                         ->default(100)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("current_mana")
                         ->label("Current Mana")
@@ -73,13 +77,14 @@ class CharacterStatisticForm
                     TextInput::make("max_stamina")
                         ->label("Max Stamina")
                         ->helperText(
-                            "Maximum stamina points (SP), if your system uses stamina.",
+                            "Maximum stamina points (SP), if your system uses stamina. Updated by Dungeon Master.",
                         )
                         ->numeric()
                         ->maxValue(255)
                         ->default(100)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("current_stamina")
                         ->label("Current Stamina")
@@ -100,44 +105,47 @@ class CharacterStatisticForm
                     TextInput::make("max_level")
                         ->label("Max Level")
                         ->helperText(
-                            "The level cap for your campaign/system (if applicable).",
+                            "The level cap for your campaign/system (if applicable). Updated by Dungeon Master.",
                         )
                         ->numeric()
                         ->maxValue(255)
                         ->default(255)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("current_level")
                         ->label("Current Level")
-                        ->helperText("Your character’s current level.")
+                        ->helperText("Your character’s current level. Updated by Dungeon Master.")
                         ->numeric()
                         ->maxValue(255)
                         ->default(1)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("max_experience")
                         ->label("Max Experience")
                         ->helperText(
-                            "The XP required to reach the next milestone/level (or XP cap, if you use one).",
+                            "The XP required to reach the next milestone/level (or XP cap, if you use one). Updated by Dungeon Master.",
                         )
-                        ->maxValue(255)
                         ->default(100)
                         ->numeric()
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("current_experience")
                         ->label("Current Experience")
                         ->helperText(
-                            "How much XP your character currently has.",
+                            "How much XP your character currently has. Updated by Dungeon Master.",
                         )
                         ->numeric()
                         ->maxValue(255)
                         ->default(0)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
                 ])
                 ->columns(2),
 
@@ -190,9 +198,16 @@ class CharacterStatisticForm
                         )
                         ->numeric()
                         ->maxValue(255)
-                        ->default(10)
+                        ->default(15)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
+                            $modifier = floor(($state - 10) / 2);
+                            $proficiency = $get('proficiency_bonus');
+                            $set('saving_throw_strength', $modifier + $proficiency);
+                            $set('strength_modifier', $modifier);
+                        }),
 
                     TextInput::make("dexterity")
                         ->label("Dexterity")
@@ -201,9 +216,16 @@ class CharacterStatisticForm
                         )
                         ->numeric()
                         ->maxValue(255)
-                        ->default(10)
+                        ->default(14)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
+                            $modifier = floor(($state - 10) / 2);
+                            $proficiency = $get('proficiency_bonus');
+                            $set('saving_throw_dexterity', $modifier + $proficiency);
+                            $set('dexterity_modifier', $modifier);
+                        }),
 
                     TextInput::make("constitution")
                         ->label("Constitution")
@@ -212,9 +234,16 @@ class CharacterStatisticForm
                         )
                         ->numeric()
                         ->maxValue(255)
-                        ->default(10)
+                        ->default(13)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
+                            $modifier = floor(($state - 10) / 2);
+                            $proficiency = $get('proficiency_bonus');
+                            $set('saving_throw_constitution', $modifier + $proficiency);
+                            $set('constitution_modifier', $modifier);
+                        }),
 
                     TextInput::make("intelligence")
                         ->label("Intelligence")
@@ -223,9 +252,16 @@ class CharacterStatisticForm
                         )
                         ->numeric()
                         ->maxValue(255)
-                        ->default(10)
+                        ->default(12)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
+                            $modifier = floor(($state - 10) / 2);
+                            $proficiency = $get('proficiency_bonus');
+                            $set('saving_throw_intelligence', $modifier + $proficiency);
+                            $set('intelligence_modifier', $modifier);
+                        }),
 
                     TextInput::make("wisdom")
                         ->label("Wisdom")
@@ -236,7 +272,15 @@ class CharacterStatisticForm
                         ->maxValue(255)
                         ->default(10)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
+                            $modifier = floor(($state - 10) / 2);
+                            $proficiency = $get('proficiency_bonus');
+                            $set('saving_throw_wisdom', $modifier + $proficiency);
+                            $set('wisdom_modifier', $modifier);
+                            $set('passive_perception', $state + $modifier);
+                        }),
 
                     TextInput::make("charisma")
                         ->label("Charisma")
@@ -245,15 +289,22 @@ class CharacterStatisticForm
                         )
                         ->numeric()
                         ->maxValue(255)
-                        ->default(10)
+                        ->default(8)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
+                            $modifier = floor(($state - 10) / 2);
+                            $proficiency = $get('proficiency_bonus');
+                            $set('saving_throw_charisma', $modifier + $proficiency);
+                            $set('charisma_modifier', $modifier);
+                        }),
                 ])
                 ->columns(3),
 
             Section::make("Ability Modifiers")
                 ->description(
-                    "Derived bonuses/penalties from your ability scores.",
+                    "Derived bonuses/penalties from your ability scores. Updated automatically when set abilities",
                 )
                 ->schema([
                     TextInput::make("strength_modifier")
@@ -262,9 +313,10 @@ class CharacterStatisticForm
                             "Modifier used for STR-based rolls and checks.",
                         )
                         ->maxValue(255)
-                        ->default(0)
+                        ->default(2)
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("dexterity_modifier")
                         ->label("Dexterity Modifier")
@@ -272,9 +324,10 @@ class CharacterStatisticForm
                             "Modifier used for DEX-based rolls and checks.",
                         )
                         ->maxValue(255)
-                        ->default(0)
+                        ->default(2)
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("constitution_modifier")
                         ->label("Constitution Modifier")
@@ -282,9 +335,10 @@ class CharacterStatisticForm
                             "Modifier used for CON-based rolls and checks.",
                         )
                         ->maxValue(255)
-                        ->default(0)
+                        ->default(1)
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("intelligence_modifier")
                         ->label("Intelligence Modifier")
@@ -292,9 +346,10 @@ class CharacterStatisticForm
                             "Modifier used for INT-based rolls and checks.",
                         )
                         ->maxValue(255)
-                        ->default(0)
+                        ->default(1)
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("wisdom_modifier")
                         ->label("Wisdom Modifier")
@@ -304,7 +359,8 @@ class CharacterStatisticForm
                         ->maxValue(255)
                         ->default(0)
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("charisma_modifier")
                         ->label("Charisma Modifier")
@@ -312,9 +368,10 @@ class CharacterStatisticForm
                             "Modifier used for CHA-based rolls and checks.",
                         )
                         ->maxValue(255)
-                        ->default(0)
+                        ->default(-1)
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
                 ])
                 ->columns(3),
 
@@ -340,9 +397,10 @@ class CharacterStatisticForm
                             "Bonus added to proficient attacks, saves, and skills.",
                         )
                         ->maxValue(255)
-                        ->default(0)
+                        ->default(1)
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("passive_perception")
                         ->label("Passive Perception")
@@ -350,10 +408,11 @@ class CharacterStatisticForm
                             "10 + Perception modifiers (used to notice things without rolling).",
                         )
                         ->maxValue(255)
-                        ->default(0)
+                        ->default(10)
                         ->numeric()
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
                 ])
                 ->columns(3),
 
@@ -371,7 +430,8 @@ class CharacterStatisticForm
                         ->maxValue(255)
                         ->default(3)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("current_death_save_success")
                         ->label("Current Death Save Successes")
@@ -393,7 +453,8 @@ class CharacterStatisticForm
                         ->maxValue(255)
                         ->default(3)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("current_death_save_failure")
                         ->label("Current Death Save Failures")
@@ -413,15 +474,16 @@ class CharacterStatisticForm
                         )
                         ->numeric()
                         ->maxValue(255)
-                        ->default(0)
+                        ->default(1)
                         ->minValue(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
                 ])
                 ->columns(3),
 
             Section::make("Saving Throws")
                 ->description(
-                    "Bonuses applied when making saving throws against effects and hazards.",
+                    "Bonuses applied when making saving throws against effects and hazards. Updated automatically when set abilities",
                 )
                 ->schema([
                     TextInput::make("saving_throw_strength")
@@ -430,7 +492,8 @@ class CharacterStatisticForm
                         ->numeric()
                         ->maxValue(255)
                         ->default(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("saving_throw_dexterity")
                         ->label("DEX Save Bonus")
@@ -440,7 +503,8 @@ class CharacterStatisticForm
                         ->numeric()
                         ->maxValue(255)
                         ->default(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("saving_throw_constitution")
                         ->label("CON Save Bonus")
@@ -450,7 +514,8 @@ class CharacterStatisticForm
                         ->numeric()
                         ->maxValue(255)
                         ->default(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("saving_throw_intelligence")
                         ->label("INT Save Bonus")
@@ -460,7 +525,8 @@ class CharacterStatisticForm
                         ->numeric()
                         ->maxValue(255)
                         ->default(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("saving_throw_wisdom")
                         ->label("WIS Save Bonus")
@@ -468,7 +534,8 @@ class CharacterStatisticForm
                         ->numeric()
                         ->maxValue(255)
                         ->default(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
 
                     TextInput::make("saving_throw_charisma")
                         ->label("CHA Save Bonus")
@@ -476,7 +543,8 @@ class CharacterStatisticForm
                         ->numeric()
                         ->maxValue(255)
                         ->default(0)
-                        ->required(),
+                        ->required()
+                        ->readOnly(),
                 ])
                 ->columns(3),
         ];
