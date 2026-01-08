@@ -9,14 +9,17 @@ use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-class GenerateCharacterImageJob implements ShouldQueue
+class GenerateCampaignCoverImageJob implements ShouldQueue
 {
     use Queueable;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(public AiRequestLog $aiRequestLog) {}
+    public function __construct(public AiRequestLog $aiRequestLog)
+    {
+        //
+    }
 
     /**
      * Execute the job.
@@ -27,18 +30,18 @@ class GenerateCharacterImageJob implements ShouldQueue
 
         try {
             $service = app()->make(KieaiService::class);
-            $result = $service->getTaskStatus(aiRequestLog: $this->aiRequestLog, savePath: 'characters');
+            $result = $service->getTaskStatus(aiRequestLog: $this->aiRequestLog, savePath: 'covers');
             if ($result) {
-                $this->aiRequestLog->requestable()->update(['image_url' => $result]);
+                $this->aiRequestLog->requestable()->update(['cover' => $result]);
                 Notification::make()
                     ->title('Image Generated')
                     ->body('Your image has been generated, Please reload the page.')
                     ->sendToDatabase($user);
             } else {
-                GenerateCharacterImageJob::dispatch($this->aiRequestLog)->delay(30);
+                GenerateCampaignCoverImageJob::dispatch($this->aiRequestLog)->delay(30);
             }
         } catch (\Exception $e) {
-            RetryFailedGenerateCharacterImageJob::dispatch();
+            RetryFailedGenerateCampaignCoverImageJob::dispatch();
             Notification::make()
                 ->title('Image Generation Failed')
                 ->body('An error occurred while generating your image, please try again later.')

@@ -73,6 +73,12 @@ class Character extends Page
         $this->redirect(route(ShowCharacter::getRouteName(), ['id' => $id]));
     }
     
+    /**
+     * Generate AI image for character
+     * 
+     * @param int $id
+     * @return void
+     */
     public function generateAIImage(int $id): void
     {
         GenerateCharacterImage::run($id);

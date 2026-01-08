@@ -3,6 +3,8 @@
 namespace App\Actions\AI;
 
 use App\Enums\AI\ImageAspectRatio;
+use App\Enums\AI\RequestType;
+use App\Jobs\AI\GenerateCharacterImageJob;
 use App\Models\Character;
 use App\Services\KieaiService;
 use Filament\Notifications\Notification;
@@ -34,11 +36,14 @@ class GenerateCharacterImage
             $prompt .= " .The style of the character is artsy, elegant, and detailed.";
             
             $service = app()->make(KieaiService::class);
-            $service->prompt($prompt)
+            $result = $service->prompt($prompt)
                 ->data($character)
                 ->aspectRatio(ImageAspectRatio::ThreeTwo)
-                ->sendRequest();
-                
+                ->requestType(RequestType::CharacterImageGeneration)
+                ->generateImage();
+
+            GenerateCharacterImageJob::dispatch($result)->delay(60);
+
             Notification::make()
                 ->title('Generating Character Image')
                 ->body('Please wait while we generate your character image, estimated time: 1-2 minutes.')

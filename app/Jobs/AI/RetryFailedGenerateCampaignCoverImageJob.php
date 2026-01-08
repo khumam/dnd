@@ -8,7 +8,7 @@ use App\Models\AiRequestLog;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-class RetryFailedGenerateCharacterImageJob implements ShouldQueue
+class RetryFailedGenerateCampaignCoverImageJob implements ShouldQueue
 {
     use Queueable;
 
@@ -26,12 +26,12 @@ class RetryFailedGenerateCharacterImageJob implements ShouldQueue
     public function handle(): void
     {
         $aiRequestLogs = AiRequestLog::where("status", RequestStatus::Failed->value)
-            ->where('type', RequestType::CharacterImageGeneration->value)
+            ->where('type', RequestType::CampaignCoverImageGeneration->value)
             ->get();
 
         foreach ($aiRequestLogs as $aiRequestLog) {
             $aiRequestLog->update(['status' => RequestStatus::Pending]);
-            GenerateCharacterImageJob::dispatch($aiRequestLog)->delay(30);
+            GenerateCampaignCoverImageJob::dispatch($aiRequestLog)->delay(30);
         }
     }
 }

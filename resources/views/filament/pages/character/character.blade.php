@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div wire:click="createCharacter" class="bg-[#59656F]/30 hover:bg-[#59656F]/10 p-4 flex flex-col items-center rounded cursor-pointer justify-center">
+        <div wire:click="createCharacter" class="bg-[#59656F]/30 hover:bg-[#59656F]/10 p-4 flex flex-col items-center rounded-xl cursor-pointer justify-center">
             <div class="w-full h-full flex items-center justify-center flex-col">
                 <div class="text-[#1D1E2C] h-12 w-12 mb-4">
                     <x-lucide-plus class="text-white" />
@@ -9,10 +9,10 @@
             </div>
         </div>
         @foreach($characters as $character)
-            <div wire:click="detailCharacter({{ $character->id }})" class="bg-[#1D1E2C] p-4 flex flex-col items-center rounded cursor-pointer gap-4">
+            <div wire:click="detailCharacter({{ $character->id }})" class="bg-[#1D1E2C] p-4 flex flex-col items-center rounded-xl cursor-pointer gap-4">
                 <div class="w-full bg-[#1D1E2C] rounded aspect-3/2 overflow-hidden flex items-center justify-center">
                     @if($character->image_url)
-                    <img src="{{ \Storage::temporaryUrl($character->image_url, now()->addMinutes(5)) }}" class="w-full h-full object-cover rounded-lg" alt="{{ $character->name }}">
+                    <img src="{{ \Storage::temporaryUrl($character->image_url, now()->addMinutes(5)) }}" class="w-full h-full object-cover rounded-lg" alt="{{ $character->name }}" />
                     @else
                     @if(!$character->aiRequestLog)
                     <button class="bg-[#9C528B] text-white px-4 py-2 rounded-lg" wire:click="generateAIImage({{ $character->id }})">Generate AI Image</button>

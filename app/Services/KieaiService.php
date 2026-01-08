@@ -8,12 +8,14 @@ use App\Enums\AI\RequestType;
 use App\Enums\AspectRatio;
 use App\Enums\OutputFormat;
 use App\Jobs\AI\GenerateCharacterImageJob;
+use App\Models\AiRequestLog;
 use App\Models\AIResponseLog;
 use Exception;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Request;
 
 class KieaiService
 {
@@ -23,6 +25,7 @@ class KieaiService
     protected string $prompt;
     protected ImageAspectRatio $aspectRatio;
     protected Model $data;
+    protected RequestType $requestType;
     
     /**
      * Constructor for KieaiService class.
@@ -87,11 +90,24 @@ class KieaiService
     }
     
     /**
-     * Send the request to the Kieai API.
+     * Set the request type for the image generation.
      * 
-     * @return array|bool
+     * @param RequestType $requestType The request type for the image generation.
+     * @return $this
      */
-    public function sendRequest(): array|bool
+    public function requestType(RequestType $requestType): KieaiService
+    {
+        $this->requestType = $requestType;
+        
+        return $this;
+    }
+    
+    /**
+     * Send the request to generate image in the Kieai API.
+     * 
+     * @return AiRequestLog
+     */
+    public function generateImage(): AIRequestLog
     {
         try {
             $url = "{$this->baseUrl}/createTask";
@@ -108,7 +124,7 @@ class KieaiService
     
                 $requestLog = $this->data->aiRequestLog()->create([
                     'user_id' => auth()->id(),
-                    'type' => RequestType::CharacterImageGeneration,
+                    'type' => $this->requestType,
                     'status' => RequestStatus::Pending,
                     'request_data' => $body,
                     'response_data' => $result,
@@ -116,10 +132,10 @@ class KieaiService
                     'record_id' => $result['data']['recordId']
                 ]);
                 
-                GenerateCharacterImageJob::dispatch($requestLog)->delay(60);
+                return $requestLog;
             }
             
-            return $response->json();
+            throw new Exception("Failed to create image");
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -129,9 +145,9 @@ class KieaiService
      * Get the status of a task.
      * 
      * @param Model $aiRequestLog The AI request log.
-     * @return bool
+     * @return string|bool
      */
-    public function getTaskStatus(Model $aiRequestLog): bool
+    public function getTaskStatus(Model $aiRequestLog, string $savePath): string|bool
     {
         try {
             $url = "{$this->baseUrl}/recordInfo?taskId={$aiRequestLog->task_id}";
@@ -153,11 +169,10 @@ class KieaiService
                     $resultImages = json_decode($result['data']['resultJson'], true);
                     $imageUrl = $resultImages['resultUrls'][0];
                     $generatedImage = file_get_contents($imageUrl);
-                    $savedAs = "characters/" . substr($imageUrl, strrpos($imageUrl, '/') + 1);
+                    $savedAs = "{$savePath}/" . substr($imageUrl, strrpos($imageUrl, '/') + 1);
                     Storage::put($savedAs, $generatedImage);
-                    
-                    $aiRequestLog->requestable()->update(['image_url' => $savedAs]);
-                    return true;
+
+                    return $savedAs;
                 }
             }
     
